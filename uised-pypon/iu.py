@@ -18,7 +18,7 @@ def get_lessons():
     global cells, sheet
     cells, sheet = get_all(file_name, sheet_name)
     cell_quantity_text['text'] = 'Знайдено {} пар'.format(len(cells))
-    print_lesson(0)
+    print_lesson( int(lesson_num_entry.get()) if lesson_num_entry.get() else 0)
 
     magick_button['state'] = 'normal'
     divisions_button['state'] = 'normal'
