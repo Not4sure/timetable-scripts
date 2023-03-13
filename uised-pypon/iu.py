@@ -83,10 +83,12 @@ def print_lesson(lesson_index):
     lesson_repeat['text'] = lesson['repeat']
 
 
+def onKeyPress(event):
+    print('You pressed %s\n' % (event.char, ))
+
 root = Tk()
 root.title("This pypon is yours")
 root.geometry('1000x600')
-root.grid()
 
 label = Label(root, text ='Добро пожаловать в ад! Вставь аксес токен кста').grid(row=0, column=1)
 access_token_entry = Entry(root)
@@ -118,12 +120,14 @@ lesson_num_entry.grid(row=5, column=0)
 # Prev button
 prev_button = Button(root, text='<', state='disabled',command=lambda:print_lesson(int(lesson_num_entry.get()) - 1))
 prev_button.grid(row=5, column=1)
+root.bind('<Left>', lambda event:print_lesson(int(lesson_num_entry.get()) - 1))
 # Find button
 find_button = Button(root, text='Знайти', state='disabled',command=lambda:print_lesson(int(lesson_num_entry.get())))
 find_button.grid(row=5, column=2)
 # Next button
 next_button = Button(root, text='>', state='disabled',command=lambda:print_lesson(int(lesson_num_entry.get()) + 1))
 next_button.grid(row=5, column=3)
+root.bind('<Right>', lambda event:print_lesson(int(lesson_num_entry.get()) + 1))
 
 lesson_name_label = Label(root, text='тут шось буде')
 lesson_name_label.grid(row=4, column=2)
