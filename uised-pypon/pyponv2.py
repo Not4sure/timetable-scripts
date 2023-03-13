@@ -144,7 +144,7 @@ def search_links(cell):
         links = value.split(' ')
         for link in links:
             if 'https' in link:
-                res.append(link.replace(',', ''))
+                res.append(link.replace(',', '').replace(' ', ''))
     return res
 
 def split_lecturer(fullname):
@@ -188,10 +188,11 @@ def get_lesson_dimensions_and_subject_cell(sheet, root_cell):
                     return height, length, subject_cell
             height += 1
 
-            cell_length = get_cell_length(sheet, cell)
-            if length == 1 and cell_length > 1:
-                length = cell_length
-                subject_cell = cell
+            if is_not_blank(cell.value):
+                cell_length = get_cell_length(sheet, cell)
+                if length == 1 and cell_length > 1:
+                    length = cell_length
+                    subject_cell = cell
     return height, length, subject_cell
 
 
