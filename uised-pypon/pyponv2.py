@@ -147,13 +147,33 @@ def search_links(cell):
                 res.append(link.replace(',', ''))
     return res
 
+def split_lecturer(fullname):
+    t = {}
+    i = 2
+    parts = fullname.split(' ')
+    if parts[0][-1] == '.':
+        t["lastname"] = parts[1]
+    else:
+        t["lastname"] = parts[0].split('.')[1]
+        i = 1
+
+    if '.' in parts[i]:
+        partsOfParts = parts[i].split('.')
+        t["n"] = partsOfParts[0]
+        t["p"] = partsOfParts[1]
+    else:
+        t["n"] = parts[i]
+        t["p"] = ""
+
+    return t
+
 def search_lecturers(cell):
     value = cell.value
     if is_not_blank(value):
         for prefix in lecturer_prefixes:
             if prefix in value:
                 lol = re.search(lecturer_regex, value)
-                return [lol.group()]
+                return [split_lecturer(lol.group())]
     return []
 
 # todo: Sometimes returns height grater by 1
