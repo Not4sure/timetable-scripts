@@ -3,6 +3,7 @@ from tkinter.ttk import *
 from pyponv2 import get_all_divisions, get_all, get_lesson
 import json
 import requests
+import sys
 
 
 sheet = {}
@@ -83,9 +84,6 @@ def print_lesson(lesson_index):
     lesson_repeat['text'] = lesson['repeat']
 
 
-def onKeyPress(event):
-    print('You pressed %s\n' % (event.char, ))
-
 root = Tk()
 root.title("This pypon is yours")
 root.geometry('1000x600')
@@ -97,12 +95,12 @@ access_token_entry.grid(row=0, column=2)
 # file params ui
 Label(root, text="file path").grid(row=1, column=0)
 file_entry = Entry(root, width=50)
-file_entry.insert(0,'ari.xlsx')
+file_entry.insert(0, sys.argv[1] if len(sys.argv) > 1 else 'ari.xlsx')
 file_entry.grid(row=1, column=1)
 
 Label(root, text='sheet name').grid(row=2, column=0)
 sheet_entry = Entry(root, width=50)
-sheet_entry.insert(0,'Лист1')
+sheet_entry.insert(0, sys.argv[2] if len(sys.argv) > 2 else 'Лист1')
 sheet_entry.grid(row=2, column=1)
 
 Button(root, text='Перезавантажити', command=get_lessons).grid(row=1, column=2)

@@ -2,7 +2,7 @@ import re
 import openpyxl
 import string
 
-week_variants = ['1-15', '2-14']
+week_variants = ['1-15', '2-14', '1-9', '1-11', '3-11', '2-8', '2-10', '1-6', '1-5', '1-7', '1-8']
 lesson_triggers = week_variants
 divisions_row = 10
 lesson_num_col = 'B'
@@ -13,7 +13,7 @@ prefixes_regex = ''
 for prefix in lecturer_prefixes:
     prefixes_regex += prefix.replace('.', '\.') + '|'
 prefixes_regex = prefixes_regex[:len(prefixes_regex)-1]
-lecturer_regex = "("+prefixes_regex+") ?([А-яіІїЇ'ґҐєЄ]){3,15} ([А-яіІїЇ'ґҐєЄ]\.[А-яіІїЇ'ґҐєЄ]\.?|([А-яіІїЇ'ґҐєЄ]){3,15})"
+lecturer_regex = "^ ?("+prefixes_regex+")(| |  | \.)(?P<lastname>[А-яіІїЇ'ґҐєЄ]{3,15}) ((?P<n>[А-яіІїЇ'ґҐєЄ])\.(?P<p>[А-яіІїЇ'ґҐєЄ])\.?|(?P<name_only>[А-яіІїЇ'ґҐєЄ]{3,15}))"
 
 
 def is_blank(s):
@@ -100,35 +100,6 @@ def get_divisions(sheet, cell, length):
                     result.append(divisions)
     return result
 
-# DEprecated
-def get_teacher(teacher):
-    t = {}
-    i = 2
-    parts = teacher.split(' ')
-
-    if parts[0][-1] == '.':
-        t["lastname"] = parts[1]
-    else:
-        t["lastname"] = parts[0].split('.')[1]
-        i = 1
-
-    partsOfParts = parts[i].split('.')
-    t["n"] = partsOfParts[0]
-    t["p"] = partsOfParts[1]
-    return t
-
-# DEprecated
-def get_type(cell):
-    if is_not_blank(cell):
-        if 'лек' in cell or 'Лек' in cell:
-            return 'lecture'
-        elif 'пр' in cell or 'Пр' in cell:
-            return 'practice'
-        elif 'лаб' in cell or 'Лаб' in cell:
-            return 'lab'
-        else:
-            raise ValueError(cell)
-
 def search_type(cell):
     if is_not_blank(cell.value):
         value = cell.value.lower()
@@ -147,6 +118,7 @@ def search_links(cell):
                 res.append(link.replace(',', '').replace(' ', ''))
     return res
 
+# Deprecated
 def split_lecturer(fullname):
     t = {}
     i = 2
@@ -167,14 +139,21 @@ def split_lecturer(fullname):
 
     return t
 
-def search_lecturers(cell):
+def search_lecturer(cell):
+    lecturer = {}
     value = cell.value
     if is_not_blank(value):
         for prefix in lecturer_prefixes:
             if prefix in value:
-                lol = re.search(lecturer_regex, value)
-                return [split_lecturer(lol.group())]
-    return []
+                match = re.search(lecturer_regex, value)
+                lecturer['lastname'] = match.group('lastname')
+                if match.group('name_only'):
+                    lecturer['n'] = match.group('name_only')
+                    lecturer['p'] = ''
+                else:
+                    lecturer['n'] = match.group('n')
+                    lecturer['p'] = match.group('p')
+    return lecturer if 'lastname' in lecturer else None
 
 # todo: Sometimes returns height grater by 1
 def get_lesson_dimensions_and_subject_cell(sheet, root_cell):
@@ -221,8 +200,9 @@ def get_lesson(root_cell, sheet):
                 if not link in links:
                     links.append(link)
 
-
-            lecturers += search_lecturers(cell)
+            lecturer = search_lecturer(cell)
+            if lecturer is not None:
+                lecturers.append(lecturer)
 
     lesson['subject'] = subject_cell.value
     lesson['divisions'] = get_divisions(sheet, root_cell, length)
@@ -249,8 +229,10 @@ def get_all(file_name, sheet_name):
             if is_blank(value):
                 continue
             value = str(value)
-            if '1-15' in value or '2-14'  in value:
-                cells.append(cell)
+            for trigger in lesson_triggers:
+                if trigger in value:
+                    cells.append(cell)
+                    break
 
     return cells, sheet
 
