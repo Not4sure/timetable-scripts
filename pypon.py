@@ -136,12 +136,11 @@ def get_teacher(teacher):
 
 def get_type(cell):
     if is_not_blank(cell):
-        return 'lecture' if 'лек' in cell else 'practice' if 'пр' in cell else 'lab' if ' лаб' in cell else None
+        return 'lecture' if ('лек' in cell or 'Лек' in cell) else 'practice' if ('пр' in cell or 'Пр' in cell) else 'lab' if (' лаб' in cell or ' Лаб' in cell) else None
 
 
-
-wb = openpyxl.load_workbook('routine-ics-2course.xlsx')
-sheet_name = 'Лист1'
+wb = openpyxl.load_workbook('ari.xlsx')
+sheet_name = '1 курс'
 sheet = wb[sheet_name]
 
 lessons = list()

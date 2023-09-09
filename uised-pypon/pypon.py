@@ -48,8 +48,9 @@ def cell_length(sheet, column, row):
     for i in range(column_num, column_num+100):
         try:
             new_column = openpyxl.utils.cell.get_column_letter(i)
-            sheet.unmerge_cells(column+row+':'+new_column+row)
+            print('lol', column+row+':'+new_column+row)
             if new_column != column:
+                sheet.unmerge_cells(column+row+':'+new_column+row)
                 count = openpyxl.utils.cell.column_index_from_string(new_column) - openpyxl.utils.cell.column_index_from_string(column) + 1
                 break
         except ValueError:
@@ -276,9 +277,12 @@ def get_lesson(cell, sheet):
         else:
             subject = get_cell_value(sheet, get_cell(col, current_row))
             print(subject)
-            length = cell_length(sheet, col, str(current_row))
-            lesson['length'] = length
-            lesson['divisions'] = get_groups(sheet, col, 10, length)
+
+            if is_not_blank(subject):
+                print(sheet, col, current_row) 
+                length = cell_length(sheet, col, str(current_row))
+                lesson['length'] = length
+                lesson['divisions'] = get_groups(sheet, col, 10, length)
 
 
 
@@ -296,22 +300,7 @@ def get_lesson(cell, sheet):
 
     return lesson
 
-def get_all(file_name, sheet_name):
-    wb = openpyxl.load_workbook(file_name)
-    sheet = wb[sheet_name]
 
-    cells = list()
-
-    for col in sheet.iter_cols(min_col=2, min_row=15, max_col=200):
-        for cell in col:
-            value = cell.value
-            if is_blank(value):
-                continue
-            value = str(value)
-            if '7-19' in value or '6-20'  in value:
-                cells.append(cell)
-
-    return cells, sheet
 
 
 # data = json.dumps(lessons)
