@@ -2,18 +2,19 @@ import re
 import openpyxl
 import string
 
-week_variants = ['1-15', '2-14', '1-9', '1-11', '3-11', '2-8', '2-10', '1-6', '1-5', '1-7', '1-8']
+week_variants = ['1-15', '2-14', '3-15', '1-6', '1-5', '2-6']
+
 lesson_triggers = week_variants
 divisions_row = 10
 lesson_num_col = 'B'
 day_num_col = 'A'
 days = [ "П О Н Е Д I Л О К", "В I В Т О Р О К", "С Е Р Е Д А", "Ч Е Т В Е Р", "П ` Я Т Н И Ц Я" ]
-lecturer_prefixes = ['д.', 'в.', 'пр.', 'ств.', 'ст.в.', 'доц.', 'ст.вик.', 'ас.', 'проф.']
+lecturer_prefixes = ['д.', 'в.', 'пр.', 'ств.', 'ст.в.', 'ст. вик.', 'доц.', 'ст.вик.', 'ас.', 'проф.']
 prefixes_regex = ''
 for prefix in lecturer_prefixes:
     prefixes_regex += prefix.replace('.', '\.') + '|'
 prefixes_regex = prefixes_regex[:len(prefixes_regex)-1]
-lecturer_regex = "^ ?("+prefixes_regex+")(| |  | \.)(?P<lastname>[А-яіІїЇ'ґҐєЄ]{3,15}) ((?P<n>[А-яіІїЇ'ґҐєЄ])\.(?P<p>[А-яіІїЇ'ґҐєЄ])\.?|(?P<name_only>[А-яіІїЇ'ґҐєЄ]{3,15}))"
+lecturer_regex = "^ ?("+prefixes_regex+")(| |  | \.)(?P<lastname>[А-яіІїЇ'ґҐєЄ]{3,15}) ((?P<n>[А-яіІїЇ'ґҐєЄ])\.\s?(?P<p>[А-яіІїЇ'ґҐєЄ])\.?|(?P<name_only>[А-яіІїЇ'ґҐєЄ]{3,15}))"
 
 
 def is_blank(s):
@@ -39,7 +40,11 @@ def get_repeat(cell):
     #     res = range(2, 15, 2) if '2-14' in week else range(1, 16, 2) if 'н/п' in week else range(1, 10) if '1-9' in week else range(1, 16)
 
     if is_not_blank(value):
-        res = 'even' if '2-' in value else 'odd' if 'н/п' in value else 'all'
+        fromWeek = value[0]
+        interval = '2' if 'пар' in value else '2' if 'н/п' in value else'1'
+        count = (int(value[2:4]) - int(value[0]))/int(interval) + 1
+        res = fromWeek + ';' + interval + ';' + str(int(count)) + ';'
+        # res = 'even' if '2-' in value else 'odd' if 'н/п' in value else 'all'
 
     return res
 
@@ -244,7 +249,7 @@ def get_all_divisions(sheet):
             if is_not_blank(name):
                 division = {
                     "name": name,
-                    "course": 23-int(name[2:-1])
+                    "course": 24-int(name[2:-1])
                 }
                 divisions.append(division)
     return divisions

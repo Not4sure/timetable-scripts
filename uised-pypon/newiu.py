@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter.ttk import *
 from pyponv2 import get_all_divisions, get_all, get_lesson
+from xlsx_creator import write_file_v1
 import json
 import requests
 import sys
@@ -17,6 +18,7 @@ def get_lessons():
     sheet_name = sheet_entry.get()
 
     global cells, sheet
+    cells.clear()
     cells, sheet = get_all(file_name, sheet_name)
     cell_quantity_text['text'] = 'Знайдено {} пар'.format(len(cells))
     print_lesson( int(lesson_num_entry.get()) if lesson_num_entry.get() else 0)
@@ -38,7 +40,7 @@ def get_divisions():
     print(divisions)
 
     for division in divisions:
-        x = requests.post('https://dev.api.univera.app/organisation/group/v1', json={"organisation": "641460ef8cc29c8ff2c3c072","name": division["name"], "course": division["course"], "type": "division", }, headers={'Authorization': 'JWT '+access_token})
+        x = requests.post('https://api.univera.app/organisation/group/v1', json={"organisation": "64f61c1c3c64a0256e8ba87b","name": division["name"], "course": division["course"], "type": "division", }, headers={'Authorization': 'JWT '+access_token})
         print(x.text)
 
 def send_to_server():
@@ -54,7 +56,14 @@ def send_to_server():
     x = requests.post('https://timetable.univera.app/hui', json={"data": lessons}, headers={'Authorization': 'JWT '+access_token})
     print(x.text)
 
-def generate():
+def generate_exel():
+    global cells, lessons, sheet
+    for cell in cells:
+        lessons.append(get_lesson(cell, sheet))
+
+    write_file_v1(sheet.title, lessons)
+
+def generate_json():
     global cells, lessons, sheet
     for cell in cells:
         lessons.append(get_lesson(cell, sheet))
@@ -160,8 +169,11 @@ Label(root, text='Lecturers').grid(row=11, column=0)
 lesson_lecturers = Label(root)
 lesson_lecturers.grid(row=11, column=1)
 
-magick_button = Button(root, text='generate JSON', state='disabled', command=generate)
+magick_button = Button(root, text='generate JSON', state='disabled', command=generate_json)
 magick_button.grid(row=2, column=2)
+
+magick_button = Button(root, text='generate EXEL', state='disabled', command=generate_exel)
+magick_button.grid(row=3, column=3)
 
 divisions_button = Button(root, text='Завантажити групи на сервер', width=30, state='disabled', command=get_divisions)
 divisions_button.grid(row=3, column=2)
